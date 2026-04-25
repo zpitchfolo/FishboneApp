@@ -1,73 +1,115 @@
-# React + TypeScript + Vite
+# 🐟 Fishbone Studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium, real-time **Fishbone (Ishikawa) diagram** editor built with React, TypeScript, and Mermaid.js.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Structured editor** — add categories (bones) and nested causes with infinite layers of detail
+- **Live Mermaid rendering** — diagrams update instantly as you type
+- **Raw Mermaid code editor** — switch between visual mode and direct code editing, with proper Tab support
+- **Local persistence** — your diagram is saved automatically in the browser (survives page reloads)
+- **Real-time collaboration** — optional Supabase integration for live sync between two users
+- **SVG export** — download your diagram as a vector graphic
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Prerequisites
 
-## Expanding the ESLint configuration
+- [Node.js](https://nodejs.org/) v18 or later
+- npm (comes with Node.js)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Quick Start (Local Mode)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# 1. Clone the repository
+git clone https://github.com/zpitchfolo/FishboneApp.git
+cd FishboneApp
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 2. Install dependencies
+npm install
+
+# 3. Start the development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then open **http://localhost:5173** in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Your diagram is saved automatically in your browser's localStorage — no account or setup required.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Real-Time Collaboration (Optional)
+
+To sync the diagram live between two users, set up a free [Supabase](https://supabase.com) project:
+
+### 1. Create a Supabase project
+
+Go to [supabase.com](https://supabase.com) and create a new project.
+
+### 2. Create the database table
+
+In the Supabase **SQL Editor**, run:
+
+```sql
+create table diagrams (
+  id text primary key,
+  state jsonb not null,
+  updated_at timestamp with time zone default now()
+);
+
+-- Enable real-time for this table
+alter publication supabase_realtime add table diagrams;
 ```
+
+### 3. Add your credentials
+
+Create a `.env` file in the project root (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Then fill in your values from the Supabase project **Settings → API**:
+
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+Restart the dev server — the status badge in the top bar will change from **Local Mode** to **Realtime Sync**.
+
+---
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── FishboneEditor.tsx   # Sidebar editor (categories + nested causes)
+│   └── MermaidViewer.tsx    # Diagram renderer + code editor
+├── hooks/
+│   ├── useDebounce.ts       # Debounce utility
+│   └── useLocalPersistence.ts  # localStorage save/load
+├── lib/
+│   └── supabaseClient.ts    # Supabase client (gracefully disabled if unconfigured)
+├── styles/
+│   └── globals.css          # Full design system
+├── types/
+│   └── fishbone.ts          # TypeScript interfaces
+└── App.tsx                  # Root layout and data orchestration
+```
+
+---
+
+## Tech Stack
+
+| Tool | Purpose |
+|------|---------|
+| [Vite](https://vitejs.dev/) | Build tool & dev server |
+| [React 19](https://react.dev/) | UI framework |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| [Mermaid.js](https://mermaid.js.org/) | Fishbone diagram rendering (`ishikawa-beta`) |
+| [Supabase](https://supabase.com/) | Optional real-time backend |
+| [Lucide React](https://lucide.dev/) | Icons |
